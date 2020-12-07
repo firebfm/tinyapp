@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/firebfm/tinyapp/issues"
   },
-  "homepage": "https://github.com/firebfm/tinyapp#readme"
+  "homepage": "https://github.com/firebfm/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
