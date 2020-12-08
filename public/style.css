@@ -1,0 +1,19 @@
+.edit-btn {
+ 	background-color: rgb(247, 247, 247);
+ 	color: red;
+ 	font-size: 20px;
+ 	font-family: 'Courier New', Courier, monospace;
+ 	font-weight: 800;
+ 	border: none;
+ 	cursor: pointer;
+}
+
+.delete-btn {
+ 	background-color: rgb(247, 247, 247);
+ 	color: red;
+ 	font-size: 20px;
+ 	font-family: 'Courier New', Courier, monospace;
+ 	font-weight: 800;
+ 	border: none;
+ 	cursor: pointer;
+}
