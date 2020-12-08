@@ -57,6 +57,18 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${code}`);
 });
 
+app.post("/urls", (req, res) => {
+  console.log(req.body);
+  let code = generateRandomString();
+  urlDatabase[code] = req.body.longURL;
+  res.redirect(`/urls/${code}`);
+});
+
+app.post("/urls/:shortURL/delete", (req, res) => {
+  delete urlDatabase[req.params.shortURL];
+  res.redirect("/urls");
+})
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
