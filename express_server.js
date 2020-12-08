@@ -2,6 +2,10 @@ const express = require("express");
 const app = express();
 const PORT = 8080;
 
+function generateRandomString() {
+  return Math.random().toString(36).substring(2,8);
+}
+
 app.set("view engine", "ejs");
 
 const urlDatabase = {
