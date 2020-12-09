@@ -15,6 +15,16 @@ const users = {
   }
 }
 
+const emailAlreadyExists = (reqBodyEmail) => {
+  const keys = Object.keys(users)
+  for (const user of keys) {
+    if (users[user].email === reqBodyEmail) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function generateRandomString() {
   return Math.random().toString(36).substring(2,8);
 }
@@ -73,16 +83,25 @@ app.get("/hello", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  let id = generateRandomString();
-  users[id] = {
-    id: id,
-    email: req.body.email,
-    password: req.body.password
-  };
-  console.log(req.body);
-  res.cookie('user_id', id);
-  console.log(users);
-  res.redirect(`/urls`);
+  let reqBodyEmail = req.body.email;
+  let reqBodyPassword = req.body.password;
+
+  if (!reqBodyEmail || !reqBodyPassword) {
+    res.status(400).send('Error: Empty string detected');
+  } else if (emailAlreadyExists(reqBodyEmail)) {
+    res.status(400).send('Error: Email already registered');
+  } else {
+    let id = generateRandomString();
+    users[id] = {
+      id: id,
+      email: req.body.email,
+      password: req.body.password
+    };
+    console.log(req.body);
+    res.cookie('user_id', users[id]);
+    console.log(users);
+    res.redirect(`/urls`);
+  }
 });
 
 app.post("/urls", (req, res) => {
