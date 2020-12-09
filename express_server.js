@@ -25,6 +25,16 @@ const emailAlreadyExists = (reqBodyEmail) => {
   return false;
 }
 
+const verifyUser = (reqBodyEmail, reqBodyPassword) => {
+  const keys = Object.keys(users)
+  for (const user of keys) {
+    if (users[user].email === reqBodyEmail && users[user].password === reqBodyPassword) {
+      return user;
+    }
+  }
+  return null;
+}
+
 function generateRandomString() {
   return Math.random().toString(36).substring(2,8);
 }
@@ -51,6 +61,11 @@ app.get("/", (req, res) => {
 app.get("/register", (req, res) => {
   const templateVars = { user: req.cookies["user_id"] };
   res.render("registration", templateVars);
+});
+
+app.get("/login", (req, res) => {
+  const templateVars = { user: req.cookies["user_id"] };
+  res.render("login", templateVars);
 });
 
 app.get("/urls", (req, res) => {
@@ -124,9 +139,18 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  res.cookie('username', req.body.username);
-  console.log('Username is ' + req.body.username);
-  res.redirect('/urls');
+  if (emailAlreadyExists(req.body.email)) {
+    let id = verifyUser(req.body.email, req.body.password);
+    if (id) {
+      res.cookie('user_id', users[id]);
+      res.redirect('/urls');
+      console.log('Login success')
+    } else {
+      console.log('Wrong password');
+    }
+  } else {
+    console.log('Email cannot be found');
+  }
 });
 
 app.post("/logout", (req, res) => {
