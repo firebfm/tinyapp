@@ -62,14 +62,20 @@ app.post("/urls", (req, res) => {
 app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
-})
+});
 
 // Editing a short url into a new long url, button in urls_show
 app.post("/urls/:shortURL", (req, res) => {
   let newLongURL = req.body.newLongURL;
   urlDatabase[req.params.shortURL] = newLongURL;
   res.redirect(`/urls/${req.params.shortURL}`);
-})
+});
+
+app.post("/login", (req, res) => {
+  res.cookie('username', req.body.username);
+  console.log('Username is ' + req.body.username);
+  res.redirect('/urls');
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
