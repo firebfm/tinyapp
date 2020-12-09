@@ -57,16 +57,16 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${code}`);
 });
 
-app.post("/urls", (req, res) => {
-  console.log(req.body);
-  let code = generateRandomString();
-  urlDatabase[code] = req.body.longURL;
-  res.redirect(`/urls/${code}`);
-});
-
 app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
+})
+
+// Editing a short url into a new long url, button in urls_show
+app.post("/urls/:shortURL", (req, res) => {
+  let newLongURL = req.body.newLongURL;
+  urlDatabase[req.params.shortURL] = newLongURL;
+  res.redirect(`/urls/${req.params.shortURL}`);
 })
 
 app.listen(PORT, () => {
