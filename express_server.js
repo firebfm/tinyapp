@@ -18,6 +18,8 @@ const urlDatabase = {
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
+const cookieParser = require('cookie-parser')
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
