@@ -144,17 +144,16 @@ app.post("/login", (req, res) => {
     if (id) {
       res.cookie('user_id', users[id]);
       res.redirect('/urls');
-      console.log('Login success')
     } else {
-      console.log('Wrong password');
+      res.status(403).send('Wrong password');
     }
   } else {
-    console.log('Email cannot be found');
+    res.status(403).send('Error: Email cannot be found');
   }
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('user');
+  res.clearCookie('user_id');
   console.log('Logout success!');
   res.redirect('/urls');
 });
