@@ -2,17 +2,24 @@ const express = require("express");
 const app = express();
 const PORT = 8080;
 
+const bcrypt = require('bcrypt');
+
 const users = { 
   "y12345": {
     id: "y12345", 
     email: "user@example.com", 
-    password: "purple-monkey"
+    password: bcrypt.hashSync("purple-monkey", 10)
   },
  "qwerty": {
     id: "qwerty", 
     email: "user2@example.com", 
-    password: "1234"
+    password: bcrypt.hashSync("1234", 10)
   }
+};
+
+const urlDatabase = {
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
+  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
 };
 
 const emailAlreadyExists = (reqBodyEmail) => {
@@ -28,7 +35,8 @@ const emailAlreadyExists = (reqBodyEmail) => {
 const verifyUser = (reqBodyEmail, reqBodyPassword) => {
   const keys = Object.keys(users);
   for (const user of keys) {
-    if (users[user].email === reqBodyEmail && users[user].password === reqBodyPassword) {
+    let hashMatch = bcrypt.compareSync(reqBodyPassword, users[user].password)
+    if (users[user].email === reqBodyEmail && hashMatch) {
       return user;
     }
   }
@@ -65,11 +73,6 @@ function generateRandomString() {
 app.use(express.static('public'));
 
 app.set("view engine", "ejs");
-
-const urlDatabase = {
-  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
-  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
-};
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
@@ -140,10 +143,11 @@ app.post("/register", (req, res) => {
     res.status(400).send('Error: Email already registered');
   } else {
     let id = generateRandomString();
+    const hashedPassword = bcrypt.hashSync(reqBodyPassword, 10);
     users[id] = {
       id: id,
-      email: req.body.email,
-      password: req.body.password
+      email: reqBodyEmail,
+      password: hashedPassword
     };
     console.log(req.body);
     res.cookie('user_id', users[id]);
