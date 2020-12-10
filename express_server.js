@@ -58,8 +58,8 @@ function urlsForUser(id) {
 const matchShortURLFunc = (req) => {
   let matchShortURL = false;
   // if logged in, statement is required because can't check id of undefined cookie
-  if (req.session["user_id"]) {
-    if (urlDatabase[req.params.shortURL].userID === req.session["user_id"].id) {
+  if (req.session.user_id) {
+    if (urlDatabase[req.params.shortURL].userID === req.session.user_id.id) {
       matchShortURL = true;
     }
   }
@@ -91,19 +91,19 @@ app.get("/", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  const templateVars = { user: req.session["user_id"] };
+  const templateVars = { user: req.session.user_id };
   res.render("registration", templateVars);
 });
 
 app.get("/login", (req, res) => {
-  const templateVars = { user: req.session["user_id"] };
+  const templateVars = { user: req.session.user_id };
   res.render("login", templateVars);
 });
 
 app.get("/urls", (req, res) => {
-  if (req.session["user_id"]) {
-    let urlDatabaseForUser =  urlsForUser(req.session["user_id"].id);
-    const templateVars = { user: req.session["user_id"], urls: urlDatabaseForUser };
+  if (req.session.user_id) {
+    let urlDatabaseForUser =  urlsForUser(req.session.user_id.id);
+    const templateVars = { user: req.session.user_id, urls: urlDatabaseForUser };
     res.render("urls_index", templateVars);
   } else {
     res.render("urls_index", {user: null});
@@ -111,8 +111,8 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  if (req.session["user_id"]) {
-    const templateVars = { user: req.session["user_id"] };
+  if (req.session.user_id) {
+    const templateVars = { user: req.session.user_id };
     res.render("urls_new", templateVars);
   } else {
     res.redirect('/login');
@@ -121,7 +121,7 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   let matchShortURL = matchShortURLFunc(req);
-  const templateVars = { user: req.session["user_id"], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, matchShortURL: matchShortURL };
+  const templateVars = { user: req.session.user_id, shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, matchShortURL: matchShortURL };
   res.render("urls_show", templateVars);
 });
 
@@ -167,7 +167,7 @@ app.post("/urls", (req, res) => {
   let code = generateRandomString();
   urlDatabase[code] = {
     longURL: req.body.longURL,
-    userID: req.session["user_id"].id
+    userID: req.session.user_id.id
   };
   res.redirect(`/urls/${code}`);
   console.log('URLDATABASE IS ' + JSON.stringify(urlDatabase));
