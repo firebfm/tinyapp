@@ -13,7 +13,7 @@ const users = {
     email: "user2@example.com", 
     password: "1234"
   }
-}
+};
 
 const emailAlreadyExists = (reqBodyEmail) => {
   const keys = Object.keys(users)
@@ -23,16 +23,27 @@ const emailAlreadyExists = (reqBodyEmail) => {
     }
   }
   return false;
-}
+};
 
 const verifyUser = (reqBodyEmail, reqBodyPassword) => {
-  const keys = Object.keys(users)
+  const keys = Object.keys(users);
   for (const user of keys) {
     if (users[user].email === reqBodyEmail && users[user].password === reqBodyPassword) {
       return user;
     }
   }
   return null;
+};
+
+function urlsForUser(id) {
+  const newObj = {};
+  const keys = Object.keys(urlDatabase);
+  for (const key of keys) {
+    if (urlDatabase[key].userID === id) {
+      newObj[key] = (urlDatabase[key]);
+    }
+  }
+  return newObj;
 }
 
 function generateRandomString() {
@@ -69,8 +80,13 @@ app.get("/login", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { user: req.cookies["user_id"], urls: urlDatabase };
-  res.render("urls_index", templateVars);
+  if (req.cookies["user_id"]) {
+    let urlDatabaseForUser =  urlsForUser(req.cookies["user_id"].id);
+    const templateVars = { user: req.cookies["user_id"], urls: urlDatabaseForUser };
+    res.render("urls_index", templateVars);
+  } else {
+    res.render("urls_index", {user: null});
+  }
 });
 
 app.get("/urls/new", (req, res) => {
