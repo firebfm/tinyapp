@@ -3,6 +3,7 @@ const app = express();
 const PORT = 8080;
 
 const bcrypt = require('bcrypt');
+const { getUserByEmail, generateRandomString } = require('./helpers.js');
 
 const users = { 
   "y12345": {
@@ -20,16 +21,6 @@ const users = {
 const urlDatabase = {
   b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
   i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
-};
-
-const emailAlreadyExists = (reqBodyEmail) => {
-  const keys = Object.keys(users)
-  for (const user of keys) {
-    if (users[user].email === reqBodyEmail) {
-      return true;
-    }
-  }
-  return false;
 };
 
 const verifyUser = (reqBodyEmail, reqBodyPassword) => {
@@ -66,10 +57,6 @@ const matchShortURLFunc = (req) => {
   return matchShortURL;
 }
 
-function generateRandomString() {
-  return Math.random().toString(36).substring(2,8);
-}
-
 app.use(express.static('public'));
 
 app.set("view engine", "ejs");
@@ -87,7 +74,11 @@ app.use(cookieSession({
 }));
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  if (req.session.user_id) {
+    res.redirect('/urls');
+  } else {
+    res.redirect('/login');
+  }
 });
 
 app.get("/register", (req, res) => {
@@ -145,7 +136,7 @@ app.post("/register", (req, res) => {
 
   if (!reqBodyEmail || !reqBodyPassword) {
     res.status(400).send('Error: Empty string detected');
-  } else if (emailAlreadyExists(reqBodyEmail)) {
+  } else if (getUserByEmail(reqBodyEmail, users)) {
     res.status(400).send('Error: Email already registered');
   } else {
     let id = generateRandomString();
@@ -192,7 +183,7 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  if (emailAlreadyExists(req.body.email)) {
+  if (getUserByEmail(req.body.email, users)) {
     let id = verifyUser(req.body.email, req.body.password);
     if (id) {
       req.session.user_id = users[id];
