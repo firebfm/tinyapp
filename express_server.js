@@ -99,7 +99,14 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { user: req.cookies["user_id"], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL };
+  matchShortURL = false;
+  // if logged in, statement is required because can't check id of undefined cookie
+  if (req.cookies["user_id"]) {
+    if (urlDatabase[req.params.shortURL].userID === req.cookies["user_id"].id) {
+      matchShortURL = true;
+    }
+  }
+  const templateVars = { user: req.cookies["user_id"], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, matchShortURL: matchShortURL };
   res.render("urls_show", templateVars);
 });
 
