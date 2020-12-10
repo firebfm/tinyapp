@@ -44,8 +44,8 @@ app.use(express.static('public'));
 app.set("view engine", "ejs");
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
+  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
 };
 
 const bodyParser = require("body-parser");
@@ -83,13 +83,13 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { user: req.cookies["user_id"], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  const templateVars = { user: req.cookies["user_id"], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL };
   res.render("urls_show", templateVars);
 });
 
 // shortURL redirects to actual longURL website
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
 
@@ -126,8 +126,12 @@ app.post("/register", (req, res) => {
 app.post("/urls", (req, res) => {
   console.log(req.body);
   let code = generateRandomString();
-  urlDatabase[code] = req.body.longURL;
+  urlDatabase[code] = {
+    longURL: req.body.longURL,
+    userID: req.cookies["user_id"].id
+  };
   res.redirect(`/urls/${code}`);
+  console.log('URLDATABASE IS ' + JSON.stringify(urlDatabase));
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
@@ -138,7 +142,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 // Editing a short url into a new long url, button in urls_show
 app.post("/urls/:shortURL", (req, res) => {
   let newLongURL = req.body.newLongURL;
-  urlDatabase[req.params.shortURL] = newLongURL;
+  urlDatabase[req.params.shortURL].longURL = newLongURL;
   res.redirect(`/urls/${req.params.shortURL}`);
 });
 
