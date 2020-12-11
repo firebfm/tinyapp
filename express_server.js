@@ -1,9 +1,18 @@
 const express = require("express");
 const app = express();
 const PORT = 8080;
-
+const bodyParser = require("body-parser");
 const bcrypt = require('bcrypt');
+const cookieSession = require('cookie-session');
 const { getUserByEmail, generateRandomString } = require('./helpers.js');
+
+app.use(express.static('public'));
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieSession({
+  name: 'session',
+  keys: ['foobar', 'applesauce']
+}));
+app.set("view engine", "ejs");
 
 const users = { 
   "y12345": {
@@ -23,6 +32,7 @@ const urlDatabase = {
   i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
 };
 
+// return user if email and password match
 const verifyUser = (reqBodyEmail, reqBodyPassword) => {
   const keys = Object.keys(users);
   for (const user of keys) {
@@ -34,6 +44,7 @@ const verifyUser = (reqBodyEmail, reqBodyPassword) => {
   return null;
 };
 
+// get all urls that belong to user
 function urlsForUser(id) {
   const newObj = {};
   const keys = Object.keys(urlDatabase);
@@ -45,7 +56,7 @@ function urlsForUser(id) {
   return newObj;
 }
 
-// check if cookies id matches shorturl user id
+// check if shortURL belongs to user, if cookies id matches shorturl user id
 const matchShortURLFunc = (req) => {
   let matchShortURL = false;
   // if logged in, statement is required because can't check id of undefined cookie
@@ -57,23 +68,7 @@ const matchShortURLFunc = (req) => {
   return matchShortURL;
 }
 
-app.use(express.static('public'));
-
-app.set("view engine", "ejs");
-
-const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({extended: true}));
-
-const cookieParser = require('cookie-parser');
-app.use(cookieParser());
-
-const cookieSession = require('cookie-session');
-const e = require("express");
-app.use(cookieSession({
-  name: 'session',
-  keys: ['foobar', 'applesauce']
-}));
-
+// root page redirect
 app.get("/", (req, res) => {
   if (req.session.user_id) {
     res.redirect('/urls');
@@ -82,16 +77,19 @@ app.get("/", (req, res) => {
   }
 });
 
+// registration page
 app.get("/register", (req, res) => {
   const templateVars = { user: req.session.user_id };
   res.render("registration", templateVars);
 });
 
+// login page
 app.get("/login", (req, res) => {
   const templateVars = { user: req.session.user_id };
   res.render("login", templateVars);
 });
 
+// show all urls if logged in, else show error message
 app.get("/urls", (req, res) => {
   if (req.session.user_id) {
     let urlDatabaseForUser =  urlsForUser(req.session.user_id.id);
@@ -102,6 +100,7 @@ app.get("/urls", (req, res) => {
   }
 });
 
+// show create new url page
 app.get("/urls/new", (req, res) => {
   if (req.session.user_id) {
     const templateVars = { user: req.session.user_id };
@@ -111,8 +110,9 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
+// only show shortURL if it belongs to user
 app.get("/urls/:shortURL", (req, res) => {
-  if (!urlDatabase[req.params.shortURL]) {
+  if (!urlDatabase.hasOwnProperty(req.params.shortURL)) {
     res.status(404).send("Error: The ShortURL code doesn't exist");
   } else {
     let matchShortURL = matchShortURLFunc(req);
@@ -131,10 +131,7 @@ app.get("/u/:shortURL", (req, res) => {
   }
 });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
+// register user
 app.post("/register", (req, res) => {
   let reqBodyEmail = req.body.email;
   let reqBodyPassword = req.body.password;
@@ -156,6 +153,7 @@ app.post("/register", (req, res) => {
   }
 });
 
+// add new url to database
 app.post("/urls", (req, res) => {
   let code = generateRandomString();
   urlDatabase[code] = {
@@ -165,6 +163,7 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${code}`);
 });
 
+// delete url
 app.post("/urls/:shortURL/delete", (req, res) => {
   let matchShortURL = matchShortURLFunc(req);
   if (matchShortURL) {
@@ -183,6 +182,7 @@ app.post("/urls/:shortURL", (req, res) => {
   }
 });
 
+// login if conditions are met
 app.post("/login", (req, res) => {
   if (getUserByEmail(req.body.email, users)) {
     let id = verifyUser(req.body.email, req.body.password);
