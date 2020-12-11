@@ -68,6 +68,7 @@ const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
 const cookieSession = require('cookie-session');
+const e = require("express");
 app.use(cookieSession({
   name: 'session',
   keys: ['foobar', 'applesauce']
@@ -111,15 +112,23 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  let matchShortURL = matchShortURLFunc(req);
-  const templateVars = { user: req.session.user_id, shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, matchShortURL: matchShortURL };
-  res.render("urls_show", templateVars);
+  if (!urlDatabase[req.params.shortURL]) {
+    res.status(404).send("Error: The ShortURL code doesn't exist");
+  } else {
+    let matchShortURL = matchShortURLFunc(req);
+    const templateVars = { user: req.session.user_id, shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, matchShortURL: matchShortURL };
+    res.render("urls_show", templateVars);
+  }
 });
 
 // shortURL redirects to actual longURL website
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL].longURL;
-  res.redirect(longURL);
+  if (!urlDatabase[req.params.shortURL]) {
+    res.status(404).send("Error: The ShortURL code doesn't exist");
+  } else {
+    const longURL = urlDatabase[req.params.shortURL].longURL;
+    res.redirect(longURL);
+  }
 });
 
 app.get("/urls.json", (req, res) => {
