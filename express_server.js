@@ -131,10 +131,6 @@ app.get("/u/:shortURL", (req, res) => {
   }
 });
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
@@ -155,22 +151,18 @@ app.post("/register", (req, res) => {
       email: reqBodyEmail,
       password: hashedPassword
     };
-    console.log(req.body);
     req.session.user_id = users[id];
-    console.log(users);
     res.redirect(`/urls`);
   }
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);
   let code = generateRandomString();
   urlDatabase[code] = {
     longURL: req.body.longURL,
     userID: req.session.user_id.id
   };
   res.redirect(`/urls/${code}`);
-  console.log('URLDATABASE IS ' + JSON.stringify(urlDatabase));
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
@@ -207,7 +199,6 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
   req.session = null;
-  console.log('Logout success!');
   res.redirect('/urls');
 });
 
